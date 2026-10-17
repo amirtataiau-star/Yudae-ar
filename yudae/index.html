@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#233237" />
+<meta name="description" content="Yudae: The Commons. An experimental mobile-first spatial Plæthru with 3D and phone AR viewing." />
+<title>Yudae / The Commons — Spatial Plæthru</title>
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#1b292d;--panel:#28393e;--panel2:#31464a;--ink:#ecebe3;--muted:#b7c5c4;--faint:#899f9f;--rule:#4a6063;--accent:#a2d7c6;--gold:#f1d08e;--coral:#e3a89d;--button:#d8e7d5;--buttonink:#21343a;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+*{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#3d5b59 0,#1b292d 57%);color:var(--ink);font-size:16px;line-height:1.52}
+button,textarea{font:inherit}button{cursor:pointer}button:focus-visible,textarea:focus-visible{outline:3px solid #e9c878;outline-offset:3px}button[disabled]{cursor:not-allowed;opacity:.6}
+#app{max-width:820px;margin:auto;min-height:100dvh;display:flex;flex-direction:column}
+header{padding:14px max(20px,env(safe-area-inset-left));display:flex;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid rgba(193,214,206,.2)}
+.brand{font-weight:800;font-size:13px;letter-spacing:.18em;color:#e5e8d6}.brand span{color:#8daca9}.smallbutton{background:transparent;color:var(--muted);border:1px solid var(--rule);border-radius:99px;padding:7px 12px;font-size:12px}
+main{width:100%;max-width:700px;align-self:center;flex:1;padding:26px 20px 56px}footer{font-size:11px;line-height:1.5;color:var(--faint);padding:18px 20px;text-align:center;border-top:1px solid rgba(193,214,206,.12)}
+.eyebrow{color:var(--accent);font-size:12px;font-weight:750;letter-spacing:.14em;text-transform:uppercase;margin:0 0 13px}.tag{display:inline-flex;border:1px solid var(--rule);border-radius:22px;font-size:12px;line-height:1.35;padding:6px 10px;color:var(--muted)}
+h1{font-size:clamp(33px,7.6vw,56px);line-height:1.04;letter-spacing:-.045em;margin:7px 0 22px;max-width:640px}h2{font-size:clamp(26px,6vw,38px);line-height:1.14;letter-spacing:-.03em;margin:8px 0 18px}h3{font-size:18px;margin:2px 0 8px}p{margin:0 0 16px;color:#d8e2de}.lead{font-size:18px;line-height:1.62;color:#e7e9dc}.quiet{font-size:13px;color:var(--muted)}.muted{color:var(--muted)}.num{color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.1em}
+.stretch{height:13px}.actions{margin-top:24px;display:grid;gap:10px}.button{width:100%;min-height:48px;border-radius:13px;padding:13px 16px;background:var(--button);color:var(--buttonink);border:1px solid transparent;text-align:left;font-weight:750;display:flex;align-items:center;justify-content:space-between;gap:12px}.button::after{content:"→";font-size:19px}.button.secondary{background:#334b50;border-color:var(--rule);color:var(--ink)}.button.secondary::after{content:"↗"}.button.minor{background:transparent;color:#c9d5d1;border:1px solid var(--rule);min-height:43px;font-size:14px}.button.minor::after{content:""}
+.card{border:1px solid var(--rule);background:rgba(43,63,66,.75);border-radius:16px;padding:18px;margin:14px 0}.card p:last-child{margin-bottom:0}.choice{background:#2b3f43;border:1px solid #63797a;border-radius:16px;padding:19px;display:block;color:var(--ink);width:100%;text-align:left;margin:12px 0;min-height:104px}.choice:hover{border-color:#a5d7c8;background:#365055}.choice:active{transform:scale(.998)}.choice .title{display:block;font-size:17px;font-weight:750;margin:0 0 7px}.choice .details{display:block;color:#d3dcd6;font-size:14px;line-height:1.48}.choice .label{display:block;color:var(--gold);font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-weight:800;margin-bottom:7px}
+.people{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:20px 0}.person{border:1px solid var(--rule);background:#263b3e;color:var(--ink);border-radius:14px;padding:12px 8px;text-align:center;min-height:102px;font-size:14px}.person.active{border:2px solid var(--gold);padding:11px 7px}.portrait{width:40px;height:40px;border-radius:50%;margin:0 auto 7px;display:grid;place-items:center;color:#243034;font-weight:800;letter-spacing:.04em}.person span:last-child{display:block;color:var(--muted);font-size:11px;margin-top:3px}.mini-head{font-weight:750;color:var(--ink)}
+.callout{border-left:3px solid var(--gold);padding:13px 15px;background:#33474a;color:#e5e9df;border-radius:0 12px 12px 0;margin:19px 0}.callout p:last-child{margin-bottom:0}
+.topbar{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:20px}.back{background:none;border:0;color:#cde7d9;font-size:14px;padding:8px 0;font-weight:700}.stepcount{color:var(--faint);font-size:12px}
+.pips{display:flex;gap:5px;margin:0 0 24px}.pip{height:4px;flex:1;border-radius:8px;background:#466064}.pip.lit{background:#b5dacc}
+.mapcard{border:1px solid #617678;border-radius:15px;overflow:hidden;background:#344641;margin:17px 0}.mapcard svg{display:block;width:100%;height:auto}.mapsub{padding:10px 13px;border-top:1px solid var(--rule);color:#c7d9cd;font-size:12px}
+#mapCableClinic,#mapCableShuttle,#mapCableCommons{transition:stroke .3s ease} [data-powered="clinic"] #mapCableClinic{stroke:#eaa69c;filter:drop-shadow(0 0 4px #eaa69c)} [data-powered="shuttle"] #mapCableShuttle{stroke:#f1cc83;filter:drop-shadow(0 0 4px #e3b96b)} [data-powered="commons"] #mapCableCommons{stroke:#93d1bc;filter:drop-shadow(0 0 4px #74bda5)}
+.map-keys{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.key{padding:11px 12px;border-radius:10px;background:#33484c;color:var(--ink);border:1px solid var(--rule);text-align:left;font-size:13px}.key.active{border-color:var(--gold)}.location{font-weight:800;font-size:14px;color:#e7e5d8}
+.model-panel{border:1px solid #5a7073;border-radius:16px;overflow:hidden;background:linear-gradient(142deg,#78928b,#3d5557);margin:16px 0;position:relative}model-viewer{display:block;width:100%;height:min(58vh,480px);min-height:300px;background:radial-gradient(circle at 58% 30%,#8eaaa1,#354a4c)}
+.ar-button{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);min-width:205px;border:2px solid #f4e2b5;background:#202e34;color:#f9f1db;font-weight:800;border-radius:14px;padding:13px 16px;box-shadow:0 5px 16px #0006}
+.view-toggle{display:flex;gap:8px;margin:10px 0}.view-toggle button{flex:1;padding:10px 8px;background:#273b3e;border:1px solid var(--rule);border-radius:11px;color:#dce5dd;font-weight:700}.view-toggle button.selected{border-color:#cfdaa5;background:#42625b}
+.state-line{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.pill{display:inline-block;background:#334a4c;border:1px solid #577175;color:#e0ebe0;border-radius:20px;padding:6px 11px;font-size:12px}.dots{display:flex;gap:8px;flex-wrap:wrap}.dots span{color:#d0dfd3;font-size:12px}.awareness{display:grid;gap:8px;margin:14px 0}.awarebtn{background:#30494b;color:#edf0e5;border:1px solid var(--rule);border-radius:10px;padding:11px;text-align:left}.awarebtn.selected{border-color:#d5ce9c;background:#3e5856}.quote{color:#e9e6d9;font-style:italic}.check{font-size:14px;color:var(--muted)}.note{width:100%;min-height:112px;background:#1b2b2f;border:1px solid #61787b;border-radius:13px;color:var(--ink);padding:13px 15px;resize:vertical}.divider{height:1px;background:var(--rule);margin:20px 0}
+@media (min-width:700px){main{padding-top:44px}h1{margin-top:17px}.people{gap:13px}.person{min-height:115px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* AR reliability patch v0.2: genuine AR requires public HTTPS, camera overlay is unanchored. */
+.model-panel{isolation:isolate}
+.model-panel .loadingScene{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:linear-gradient(145deg,#607b73,#253c3f);color:#e7eee8;font-size:14px}.model-panel.model-ready .loadingScene,.model-panel.is-camera .loadingScene{display:none}
+.model-panel video.camera-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:0;background:#0c1719}
+.model-panel.is-camera video.camera-layer{display:block}
+.model-panel model-viewer{position:relative;z-index:1}
+.model-panel.is-camera model-viewer{background:transparent!important;--poster-color:transparent}
+.camera-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px}
+.camera-actions button{min-height:44px;flex:1;min-width:180px;background:#345b53;color:#eef4ed;border:1px solid #92c8b2;border-radius:12px;padding:10px 12px;font-weight:700}
+.camera-actions button.stop{background:#293a3c;border-color:#718985}
+.camera-actions button[hidden]{display:none}
+.ar-hint{padding:12px 14px;border:1px solid #677d75;background:#294044;border-radius:12px;font-size:13px;line-height:1.48;color:#e0e8df;margin:12px 0}
+
+</style>
+</head>
+<body>
+<div id="app">
+<header><div class="brand">YUDAE <span>/ SPATIAL PLÆTHRU</span></div><button class="smallbutton" type="button" data-action="home" aria-label="Return to introduction">Start</button></header>
+<main id="screen" aria-live="polite"></main>
+<footer>Fictional 2030 vignette · Non-canonical test scene · No scores, no AI, no data sent · Phone AR depends on browser/device and HTTPS</footer>
+</div>
+<script>
+'use strict';
+const MODELS={"intro":"assets/yudae_intro.glb","p_clinic":"assets/yudae_p_clinic.glb","p_shuttle":"assets/yudae_p_shuttle.glb","p_commons":"assets/yudae_p_commons.glb","e_clinic_open":"assets/yudae_e_clinic_open.glb","e_clinic_direct":"assets/yudae_e_clinic_direct.glb","e_shuttle_open":"assets/yudae_e_shuttle_open.glb","e_shuttle_direct":"assets/yudae_e_shuttle_direct.glb","e_commons_open":"assets/yudae_e_commons_open.glb","e_commons_direct":"assets/yudae_e_commons_direct.glb"};
+const EMBEDDED_MODELS = null;
+const pageOrder=['welcome','perspective','encounter','explore','decision1','after1','decision2','ending','reflect'];
+const labels={clinic:'Clinic refrigerator',shuttle:'School shuttle dispatch',commons:'Commons information desk'};
+const character={
+ rae:{name:'Rae',role:'Clinic aide',color:'#e3a89d',initial:'R',intro:'You have spent the last hour holding the clinic together. You know the cold storage remains sealed, but cannot confirm how long the remaining backup will last. Leaving your patients to attend a public meeting is not a neutral choice.',testimony:'The temperature logger went dark twelve minutes ago. The last reading was safe, but the buffer might be shorter than people think. I can transfer supplies if we find transport and another suitable unit.',position:'Clinic continuity; accountable for people who cannot leave.'},
+ imani:{name:'Imani',role:'Transport coordinator',color:'#f1d08e',initial:'I',intro:'You coordinate transport with a radio nearly out of charge. Families have been told there is a shuttle, but the route has changed twice. You can act on dispatch information, not on rumours about every household.',testimony:'I have a probable alternative route for the shuttle, but the driver cannot hear it until we recharge dispatch. Some households have a second plan. Two have not replied.',position:'Transport routing; cannot promise the road is open.'},
+ sol:{name:'Sol',role:'Commons steward',color:'#89d2bf',initial:'S',intro:'You are the Commons steward tonight. Several people depend on the public text notice because phone calls and spoken announcements do not reach everyone. You can recommend an allocation, but the site team must agree to move the only working battery.',testimony:'The notice desk can send text updates if it has power. A handwritten sign helps people physically here, but several residents have been displaced and will never see it.',position:'Local coordination; cannot speak for absent residents.'}
+};
+const options={
+ clinic:{title:'Recommend the clinic first',detail:'The refrigerator regains stable power for the next interval. Dispatch and the Commons desk remain uncertain.',immediate:'The site stewards agree to connect the battery to the clinic. Rae checks the logger and sees it resume. She cannot yet tell whether the supplies will remain within limits after this window. Across the road, Imani keeps trying her silent handset.',facts:['Clinic power restored for this interval','Dispatch radio uncharged','Information desk dark']},
+ shuttle:{title:'Recommend dispatch first',detail:'Radio coordination becomes possible. Clinic cold storage and the Commons desk are left on their remaining arrangements.',immediate:'Imani gets enough charge to contact the driver. The vehicle answers from an unexpected side road. The route is not yet confirmed safe; at the clinic, Rae starts organising a possible transfer rather than waiting for reassurance.',facts:['Dispatch radio restored temporarily','Clinic stability uncertain','Information desk dark']},
+ commons:{title:'Recommend the Commons desk first',detail:'Text information can circulate. Clinic and shuttle staff must manage without the shared battery for now.',immediate:'Sol reopens the text desk and begins correcting yesterday’s shelter notice. Families can send new information. At the clinic, a second power alarm sounds; at dispatch, the handset remains silent.',facts:['Text notice desk active','Clinic backup uncertain','Dispatch radio uncharged']}
+};
+const responses={
+ open:{title:'Post an accessible public status',detail:'Explain what is powered and what is unresolved, without names or personal details. It takes time to verify wording.',note:'A plain-language notice goes onto the Commons board and text feed where available. People can correct the account and coordinate help, but it takes additional minutes and the information may not reach everyone.'},
+ direct:{title:'Contact affected households directly',detail:'Ask stewards to give targeted updates first. Privacy and speed improve, but people outside the contact network may miss information.',note:'Stewards contact households and services they can reach. They protect sensitive details and move quickly. People not in their network may still rely on an inaccurate account of what the town can provide.'}
+};
+const endingText={
+ 'clinic_open':'The clinic has power for now. A neighbour reading the notice offers an insulated transfer box, but Rae has not verified whether it meets the clinic’s requirements. A parent posts that the shuttle is missing. Imani gets a new lead, not a working radio. The public account makes gaps visible without guaranteeing they close.',
+ 'clinic_direct':'The clinic buys time. Rae is able to organise a discreet supply check with a nearby service. Imani learns the battery was moved only when she reaches a steward; several families still believe transport is operating normally. The targeted contacts preserve privacy, while gaps in the wider picture persist.',
+ 'shuttle_open':'Imani reaches the driver and sends a proposed route. An updated notice enables two families to move to the new collection point; a third has not responded. Rae begins a transfer request for the cold storage. The information is shared, but power has not followed it to the clinic.',
+ 'shuttle_direct':'The driver receives a route update. Stewards contact the families whose details they have and avoid publishing a vulnerable household’s location. Another parent arrives at the old stop, unaware the plan changed. Rae is still arranging an alternative for the clinic fridge.',
+ 'commons_open':'The public text desk and notice board carry corrected information. Two residents offer a solar charger, but nobody has tested it against the clinic’s requirements. Imani receives a reported sighting of the shuttle, not confirmation. The Commons becomes more answerable without becoming more powerful.',
+ 'commons_direct':'The Commons desk remains powered while stewards use it to contact known households and the clinic. Rae receives a message about an available cold box, but compatibility is unknown. Someone at the school sees no update and assumes transport is running. Better privacy and local coordination leave a public information gap.'
+};
+const lenses={
+ experience:'Whose account feels credible in this version? Compare what people experienced with what you can verify. A different perspective changes knowledge, not automatically the event.',
+ conditions:'The battery, available adapters, routes, notice formats and working relationships shape what is feasible. Which missing condition would change the available choices?',
+ capacity:'Rae cannot leave patients; Imani cannot drive the shuttle remotely; Sol cannot reach every absent resident. Who is being asked to carry responsibility without enough capacity?',
+ possibility:'Which option becomes possible only after new information or a repaired connection? Which possibility remains open even after your recommendation?',
+ relational:'What changed between households, services and stewards? Whose account reached the wider network, and whose stayed outside it?',
+ answerability:'What would you need to revisit or publicly correct before this allocation can be defended to affected people?'
+};
+const EMPTY={page:'welcome',role:null,asked:[],focus:null,priority:null,response:null,view:'3d',returnTo:'decision1',lens:null,note:'',history:[]};
+let S=load();let currentBlob={};let arLoaded=false;let viewerWarning=false;
+const IS_EMBEDDED_PREVIEW=false;
+const AR_HOSTED=!IS_EMBEDDED_PREVIEW && location.protocol==='https:' && window.isSecureContext && window.top===window.self;
+function load(){try{let v=JSON.parse(localStorage.getItem('yudaeARv1')||'null'); if(v&&pageOrder.includes(v.page))return {...EMPTY,...v,history:Array.isArray(v.history)?v.history:[],asked:Array.isArray(v.asked)?v.asked:[]};}catch(e){}return {...EMPTY};}
+function persist(){try{localStorage.setItem('yudaeARv1',JSON.stringify(S))}catch(e){}}
+function modelPath(){let k=S.response?`e_${S.priority}_${S.response}`:S.priority?`p_${S.priority}`:'intro'; if(!EMBEDDED_MODELS)return MODELS[k];if(!currentBlob[k]){let data=atob(EMBEDDED_MODELS[k]);let bytes=Uint8Array.from(data,c=>c.charCodeAt(0)); currentBlob[k]=URL.createObjectURL(new Blob([bytes],{type:'model/gltf-binary'}));}return currentBlob[k];}
+function go(page){S.page=page;persist();render();window.scrollTo({top:0,behavior:'instant'});}
+function header(page,progress){return `<div class="topbar"><button class="back" type="button" data-action="back">← Back</button><span class="stepcount">${progress} / 6 · Yudae, 2030</span></div><div class="pips">${[1,2,3,4,5,6].map(i=>`<div class="pip ${i<=progress?'lit':''}"></div>`).join('')}</div>`}
+function action(label,action,cls=''){return `<button type="button" class="button ${cls}" data-action="${action}">${label}</button>`}
+function personCard(k,kind='select'){let p=character[k];return `<button type="button" class="person ${(S.role===k&&kind==='select')||(S.focus===k&&kind==='ask')?'active':''}" data-action="${kind==='ask'?'ask':'role'}" data-value="${k}" aria-pressed="${kind==='ask'?S.focus===k:S.role===k}"><span class="portrait" style="background:${p.color}">${p.initial}</span>${p.name}<span>${p.role}</span></button>`}
+function mapBlock(){const p=S.priority||'none'; return `<div class="mapcard" data-powered="${p}"><svg viewBox="0 0 740 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of the Commons and neighbouring Yudae buildings, showing power supply priorities">
+<defs><pattern id="noise" width="48" height="48" patternUnits="userSpaceOnUse"><path d="M2 31 L26 39 M30 2 L46 16 M5 5 L18 7" stroke="#617267" stroke-width="1" opacity=".45"/></pattern></defs>
+<rect width="740" height="460" rx="20" fill="#344641"/><rect width="740" height="460" fill="url(#noise)"/>
+<path d="M-20 242 L760 226" stroke="#374048" stroke-width="86"/><path d="M349 -40 L375 500" stroke="#374048" stroke-width="75"/>
+<path d="M-20 242 L760 226" stroke="#8f927e" stroke-width="2" stroke-dasharray="19 22"/><path d="M349 -40 L375 500" stroke="#8f927e" stroke-width="2" stroke-dasharray="19 22"/>
+<g class="mapstructure"><g transform="translate(120 97)"><rect x="-78" y="-49" width="156" height="94" rx="5" fill="#ae9d98"/><path d="M-86 -51 L-6 -78 L87 -53 L78 -39 L-79 -37Z" fill="#5c6770"/><rect x="-48" y="-12" width="22" height="24" fill="#819a9e"/><rect x="12" y="-12" width="22" height="24" fill="#819a9e"/></g>
+<g transform="translate(580 92)"><rect x="-78" y="-45" width="156" height="86" rx="4" fill="#c7b28a"/><path d="M-84 -45 L-20 -76 L86 -45 L80 -34 L-76 -34Z" fill="#606b71"/><rect x="-45" y="-8" width="24" height="25" fill="#8aa4a8"/><rect x="16" y="-8" width="24" height="25" fill="#8aa4a8"/></g>
+<g transform="translate(348 350)"><rect x="-107" y="-58" width="214" height="115" rx="6" fill="#9bad9c"/><path d="M-115 -57 L-25 -87 L117 -58 L106 -42 L-105 -42Z" fill="#606970"/><rect x="-81" y="-25" width="35" height="34" fill="#819e9f"/><rect x="41" y="-25" width="35" height="34" fill="#819e9f"/><rect x="-48" y="-70" width="25" height="12" fill="#819ea4"/><rect x="-14" y="-70" width="25" height="12" fill="#819ea4"/><rect x="20" y="-70" width="25" height="12" fill="#819ea4"/></g>
+<g transform="translate(605 340)"><path d="M-78 -30 L80 -30 L75 24 L-75 24Z" fill="#776453"/><path d="M-82 -33 L82 -33 L72 -53 L-72 -53Z" fill="#5a666b"/><rect x="-34" y="2" width="66" height="25" rx="8" fill="#ccba83"/></g></g>
+<path id="mapCableClinic" d="M445 290 Q430 195 182 121" fill="none" stroke="#676b64" stroke-width="8" stroke-linecap="round"/>
+<path id="mapCableShuttle" d="M445 290 Q558 250 607 307" fill="none" stroke="#676b64" stroke-width="8" stroke-linecap="round"/>
+<path id="mapCableCommons" d="M445 290 L409 350" fill="none" stroke="#676b64" stroke-width="8" stroke-linecap="round"/>
+<rect x="426" y="268" width="37" height="37" rx="7" fill="#1f2f35" stroke="#d2b674" stroke-width="3"/>
+<text x="443" y="293" fill="#efdab0" font-size="23" font-weight="bold" text-anchor="middle">⚡</text>
+<g font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#f2ead8">
+<text x="120" y="158" text-anchor="middle">CLINIC</text><text x="580" y="151" text-anchor="middle">SCHOOL</text>
+<text x="349" y="426" text-anchor="middle">COMMONS</text><text x="607" y="399" text-anchor="middle">SHUTTLE</text></g>
+<g fill="#f1bda8"><circle cx="210" cy="324" r="12"/></g><g fill="#eecb79"><circle cx="494" cy="219" r="12"/></g><g fill="#80cbbb"><circle cx="203" cy="429" r="12"/></g>
+</svg><div class="mapsub">${p==='none'?'Shared battery still unallocated':`Current first allocation: ${labels[p]}`} · highlighted route shows power, not wellbeing</div></div><div class="map-keys">${['clinic','shuttle','commons'].map(x=>`<button type="button" class="key ${S.focus===x?'active':''}" data-action="place" data-value="${x}">${x==='clinic'?'✦ Clinic':x==='shuttle'?'✦ Shuttle':'✦ Commons'}</button>`).join('')}</div>${S.focus&&labels[S.focus]?`<div class="callout"><strong>${labels[S.focus]}</strong><p>${{clinic:'Supplies rely on uncertain cold storage. Rae is monitoring the limits of what is known.',shuttle:'The route depends on the driver, road access, and a radio that cannot stay charged.',commons:'A text desk can coordinate information, but it cannot supply the power the other sites need.'}[S.focus]}</p></div>`:''}`}
+function spatial(){
+ let useMap=S.view==='map'||viewerWarning;
+ const arReady=AR_HOSTED;
+ const arNote=arReady
+ ? 'This is the hosted version. On a compatible phone, use Place in my space for real surface-anchored AR. If it opens and returns, check Chrome, Google Play Services for AR and camera permissions.'
+ : (IS_EMBEDDED_PREVIEW
+    ? 'Native surface-anchored AR is unavailable in this self-contained preview: its temporary 3D files cannot be opened by the separate Android AR viewer. The camera-overlay experiment below is available where camera permissions are supported.'
+    : 'Native surface-anchored AR requires this entire folder to be hosted on an HTTPS website; opening index.html as a download cannot launch it reliably.');
+ return `<div class="view-toggle"><button type="button" data-action="view" data-value="3d" class="${!useMap?'selected':''}" aria-pressed="${!useMap}">3D / camera</button><button type="button" data-action="view" data-value="map" class="${useMap?'selected':''}" aria-pressed="${useMap}">Accessible map</button></div>${useMap?mapBlock():`<div class="model-panel" id="modelPanel"><div class="loadingScene" aria-hidden="true">Preparing the Yudae miniature…</div><video id="cameraLayer" class="camera-layer" playsinline muted autoplay aria-hidden="true"></video><model-viewer id="viewer" src="${modelPath()}" ${arReady?'ar ar-modes="webxr scene-viewer quick-look"':''} camera-controls auto-rotate rotation-per-second="7deg" shadow-intensity=".7" exposure="1" environment-image="neutral" camera-orbit="30deg 65deg auto" min-camera-orbit="auto auto 80%" max-camera-orbit="auto auto 240%" interaction-prompt="auto" alt="A low-poly physical model of the fictional Yudae Commons, clinic, school and shuttle stop. Power routing changes after each recommendation.">${arReady?'<button type="button" slot="ar-button" class="ar-button">Place in my space ↗</button>':''}</model-viewer></div><div class="camera-actions"><button type="button" data-action="camera-start" id="startCamera">Try camera overlay (unanchored)</button><button type="button" data-action="camera-stop" id="stopCamera" class="stop" hidden>Stop camera</button></div><p class="quiet">Drag to rotate the model, pinch to zoom. The camera overlay shows the 3D model over a live view but <strong>does not</strong> track or anchor objects to real surfaces.</p><div class="ar-hint">${arNote}</div><p class="quiet" id="modelNotice" aria-live="polite"></p><button class="smallbutton" data-action="view" data-value="map" type="button">3D not working? Use the accessible map</button>`}`;
+}
+
+
+let cameraStream=null;
+function stopCamera(){
+ if(cameraStream){cameraStream.getTracks().forEach(track=>track.stop());cameraStream=null;}
+ const video=document.getElementById('cameraLayer');
+ if(video){video.pause();video.srcObject=null;}
+ const panel=document.getElementById('modelPanel');if(panel)panel.classList.remove('is-camera');
+ const start=document.getElementById('startCamera'),stop=document.getElementById('stopCamera');
+ if(start)start.hidden=false;if(stop)stop.hidden=true;
+}
+async function startCamera(){
+ const notice=document.getElementById('modelNotice');
+ if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+  if(notice)notice.textContent='Camera overlay unavailable in this viewer. Open the file in Chrome or Safari on a secure website with camera permissions enabled. The accessible map remains playable.';
+  return;
+ }
+ try{
+  stopCamera();
+  const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+  const video=document.getElementById('cameraLayer');
+  if(!video||S.page!=='explore'||S.view!=='3d') {stream.getTracks().forEach(track=>track.stop());return;}
+  cameraStream=stream;
+  video.srcObject=stream;
+  await video.play();
+  const panel=document.getElementById('modelPanel');if(panel)panel.classList.add('is-camera');
+  const viewer=document.getElementById('viewer');if(viewer)viewer.autoRotate=false;
+  document.getElementById('startCamera').hidden=true;
+  document.getElementById('stopCamera').hidden=false;
+  if(notice)notice.textContent='Camera overlay running. Move your phone to see the room; rotate or resize the model with touch. This is a visual overlay, not AR surface tracking.';
+ }catch(err){
+  stopCamera();
+  if(notice)notice.textContent=err&&err.name==='NotAllowedError'?'Camera permission was denied. Allow camera access in browser settings and try again.':'Could not open the camera ('+(err?.name||'unavailable')+'). Try Chrome on Android or Safari on iPhone; otherwise use the 3D model or accessible map.';
+ }
+}
+
+function render(){stopCamera();const root=document.getElementById('screen');let h='';
+ switch(S.page){
+ case 'welcome': h=`<div class="eyebrow">A Yudae spatial experiment / v0.2</div><h1>The battery at the Commons.</h1><p class="lead">In 2030, the lights are on in some parts of Yudae. In others, people are making promises that electricity cannot keep.</p><div class="card"><span class="tag">8–12 minutes · phone-first</span><div class="stretch"></div><p>Explore a small town scene, hear three partial perspectives, recommend what receives power and see what follows. Explore the changing miniature in 3D, or try the optional camera overlay. True surface-anchored AR requires a hosted HTTPS version on a compatible phone.</p><p class="quiet">A separate pilot vignette. Yudae’s nine main scenarios remain unchanged.</p></div><div class="actions">${action('Enter Yudae','begin')}${action('Preview the spatial scene','preview','secondary')}</div><div class="divider"></div><p class="quiet">Fictional conditions, not an emergency protocol. No right-answer points or diagnostic wellbeing ratings. Your path and notes stay in this browser, where storage is available.</p>`;break;
+ case 'perspective': h=`${header('perspective',1)}<div class="eyebrow">Perspective</div><h2>Whose side of the doorway?</h2><p>Start from one position. You can still inquire about the others. Changing the perspective changes what you hear first, not what secretly happened.</p><div class="people">${['rae','imani','sol'].map(k=>personCard(k)).join('')}</div>${S.role?`<div class="callout"><strong>${character[S.role].name} / ${character[S.role].role}</strong><p>${character[S.role].intro}</p></div>`:''}<div class="actions"><button type="button" class="button" data-action="to-encounter" ${S.role?'':'disabled'}>Continue to the encounter →</button></div>`;break;
+ case 'encounter': h=`${header('encounter',2)}<div class="eyebrow">Encounter · 18:10, the Commons</div><h2>The one working battery.</h2><p>The rain reaches the doorway just as the site steward unplugs the last working portable battery. Its charge will support one of three connections for the next twenty-five minutes. Switching takes time.</p><p>The clinic’s cold-storage monitor is failing. The school shuttle’s dispatch radio is nearly dead. A public text desk is needed to correct rumours about shelters and roads.</p><p>The state departments still exist, but tonight their phone numbers produce recorded messages. The site team has asked for a recommendation. <strong>They retain authority to accept or refuse it.</strong></p><div class="callout"><strong>Your initial vantage: ${character[S.role].name}</strong><p>${character[S.role].intro}</p></div><p class="mini-head">Ask another person (optional)</p><div class="people">${['rae','imani','sol'].map(k=>personCard(k,'ask')).join('')}</div>${S.focus&&character[S.focus]?`<div class="card"><span class="tag">Account · not verified</span><h3>${character[S.focus].name} says</h3><p class="quote">“${character[S.focus].testimony}”</p><p class="quiet">Limit: ${character[S.focus].position}</p></div>`:''}<p class="quiet">You may decide with incomplete information. Asking does not guarantee certainty.</p><div class="actions">${action('Look around the Commons','to-explore')}${action('Choose without more information','to-decision1','secondary')}</div>`;break;
+ case 'explore': h=`${header('explore',3)}<div class="eyebrow">Spatial scene</div><h2>Look around.</h2><p>Walk around the model with your phone if AR is available, or inspect the map. The same scene has three competing connections.</p>${spatial()}<div class="state-line"><span class="pill">Clinic · supply stability</span><span class="pill">Shuttle · transport</span><span class="pill">Commons · shared information</span></div><div class="actions">${action(S.returnTo==='after1'?'Back to first consequence':S.returnTo==='ending'?'Return to consequences':S.returnTo==='reflect'?'Return to reflection':S.returnTo==='welcome'?'Return to start':'Recommend an allocation','leave-explore')}</div>`;break;
+ case 'decision1': h=`${header('decision1',4)}<div class="eyebrow">First decision / recommend</div><h2>Where does the power go first?</h2><p>Twenty-five minutes of usable connection. It can move again, but there is no guarantee when the next repair or battery will arrive.</p>${['clinic','shuttle','commons'].map(k=>`<button type="button" data-action="priority" data-value="${k}" class="choice"><span class="label">First connection · ${labels[k]}</span><span class="title">${options[k].title}</span><span class="details">${options[k].detail}</span></button>`).join('')}<p class="quiet">This is a recommendation to the site team, not control over everyone’s choices.</p>`;break;
+ case 'after1': h=`${header('after1',5)}<div class="eyebrow">First consequence</div><h2>One connection holds.</h2><div class="callout"><strong>${labels[S.priority]}</strong><p>${options[S.priority].immediate}</p></div><div class="state-line">${options[S.priority].facts.map(t=>`<span class="pill">${t}</span>`).join('')}</div><p>Nothing outside that connection automatically resolves. Someone must still communicate the decision and account for those left waiting.</p><div class="actions">${action('See the altered 3D scene','see-mid','secondary')}${action('Continue: how to coordinate','to-decision2')}${action('Revise the first recommendation','revise-first','minor')}</div>`;break;
+ case 'decision2': h=`${header('decision2',5)}<div class="eyebrow">Second decision / coordinate</div><h2>Who needs to know?</h2><p>The first connection is operating, for now. A volunteer asks what to tell people. Sharing too little can exclude people; sharing carelessly can expose details that should stay private.</p><div class="callout"><strong>Inherited condition</strong><p>You recommended power for: ${labels[S.priority]}. The other sites still face their own constraints.</p></div>${['open','direct'].map(k=>`<button type="button" class="choice" data-action="response" data-value="${k}"><span class="label">Coordination pathway</span><span class="title">${responses[k].title}</span><span class="details">${responses[k].detail}</span></button>`).join('')}`;break;
+ case 'ending': h=`${header('ending',6)}<div class="eyebrow">Consequences / provisional</div><h2>The town moves unevenly.</h2><p>${responses[S.response].note}</p><div class="callout"><strong>What followed</strong><p>${endingText[`${S.priority}_${S.response}`]}</p></div><div class="state-line"><span class="pill">Allocation · ${labels[S.priority]}</span><span class="pill">Communication · ${S.response==='open'?'public':'targeted'}</span><span class="pill">Future support · unconfirmed</span></div><div class="actions">${action('See the result in AR / 3D','see-end','secondary')}${action('Examine what changed','to-reflect')}${action('Reconsider the second decision','revise-second','minor')}</div>`;break;
+ case 'reflect': h=`${header('reflect',6)}<div class="eyebrow">Reconsider and continue</div><h2>What did the scene make possible?</h2><p>Your sequence is recorded locally as authored causal and information changes. It is not a personality assessment or a measure of how ethically you behaved.</p><div class="card"><h3>Path taken</h3><p><strong>Perspective:</strong> ${character[S.role].name}.<br><strong>Initial recommendation:</strong> ${labels[S.priority]}.<br><strong>Coordination:</strong> ${responses[S.response].title}.</p><p class="quiet">${S.history.length} recorded decision event(s), including any superseded paths.</p><details><summary>Inspect the decision record</summary><ol>${S.history.map(e=>`<li>${e.step==='priority'?'First connection':'Coordination'}: ${e.value}. ${e.superseded?'(superseded)':''}</li>`).join('')}</ol></details></div><h3>Optional awareness lens</h3><p class="quiet">A qualitative agential-wellbeing filter. No colours for moral standing, scores, diagnoses or universal best move.</p><div class="awareness">${Object.keys(lenses).map(k=>`<button class="awarebtn ${S.lens===k?'selected':''}" data-action="lens" data-value="${k}" type="button">${k.charAt(0).toUpperCase()+k.slice(1)} ${S.lens===k?'✓':''}</button>`).join('')}</div>${S.lens?`<div class="callout">${lenses[S.lens]}</div>`:''}<label for="journal" class="mini-head">What would you need to learn or change before acting again?</label><textarea class="note" id="journal" placeholder="Your reflection stays on this device; nothing is submitted."></textarea><p class="quiet">The point is to notice shifting possibilities, limits and obligations—not to identify a winning personality or route.</p><div class="actions">${action('Revisit the spatial result','see-end','secondary')}${action('Reconsider the first decision','revise-first','minor')}${action('Try a different perspective','revise-role','minor')}${action('Begin again with a fresh path','reset','minor')}</div>`;break;
+ }
+ root.innerHTML=h;
+ if(S.page==='reflect'){const note=root.querySelector('#journal');note.value=S.note||'';note.addEventListener('input',e=>{S.note=e.target.value;persist()})}
+ if(S.page==='explore'&&S.view==='3d'&&!viewerWarning){
+  const v=root.querySelector('model-viewer');if(v){v.addEventListener('load',()=>{document.getElementById('modelPanel')?.classList.add('model-ready')});v.addEventListener('error',()=>{const n=document.getElementById('modelNotice');if(n)n.textContent='3D did not load; switch to the accessible map.'});v.addEventListener('ar-status',(e)=>{const n=document.getElementById('modelNotice');if(n&&e.detail?.status==='failed')n.textContent='AR could not start. Open the hosted page directly in Chrome/Safari, confirm camera permission and AR service support, or try the camera overlay.';});}setTimeout(()=>{if(S.page==='explore'&&S.view==='3d'&&!customElements.get('model-viewer')){viewerWarning=true;render();}},8000);
+ }
+}
+function log(step,value){for(const e of S.history){if(e.step===step&&!e.superseded)e.superseded=true}S.history.push({step,value,superseded:false})}
+function back(){const p=S.page;go({perspective:'welcome',encounter:'perspective',explore:S.returnTo||'encounter',decision1:'encounter',after1:'decision1',decision2:'after1',ending:'decision2',reflect:'ending'}[p]||'welcome')}
+function act(action,value){switch(action){
+ case 'home':go('welcome');break;
+ case 'back':back();break;
+ case 'begin':go('perspective');break;
+ case 'preview':S.returnTo='welcome';go('explore');break;
+ case 'role':S.role=value;S.focus=null;persist();render();break;
+ case 'to-encounter':if(!S.role)break;S.focus=null;go('encounter');break;
+ case 'ask':S.focus=S.focus===value?null:value;if(!S.asked.includes(value))S.asked.push(value);persist();render();break;
+ case 'to-explore':S.view='3d';S.focus=null;S.returnTo='decision1';go('explore');break;
+ case 'to-decision1':S.focus=null;go('decision1');break;
+ case 'leave-explore':go(S.returnTo||'decision1');break;
+ case 'view':S.view=value;viewerWarning=false;persist();render();break;
+ case 'camera-start':void startCamera();break;
+ case 'camera-stop':stopCamera();{const n=document.getElementById('modelNotice');if(n)n.textContent='Camera stopped. Continue in 3D or try again.';}break;
+ case 'place':S.focus=S.focus===value?null:value;persist();render();break;
+ case 'priority':S.priority=value;S.response=null;log('priority',value);go('after1');break;
+ case 'see-mid':S.returnTo='after1';S.view='3d';go('explore');break;
+ case 'to-decision2':go('decision2');break;
+ case 'response':S.response=value;log('response',value);go('ending');break;
+ case 'see-end':S.returnTo=S.page==='reflect'?'reflect':'ending';S.view='3d';go('explore');break;
+ case 'to-reflect':go('reflect');break;
+ case 'revise-first':S.response=null;S.priority=null;S.history.forEach(x=>{if(!x.superseded)x.superseded=true});go('decision1');break;
+ case 'revise-second':S.response=null;S.history.forEach(x=>{if(x.step==='response'&&!x.superseded)x.superseded=true});go('decision2');break;
+ case 'revise-role':S.role=null;S.focus=null;go('perspective');break;
+ case 'lens':S.lens=S.lens===value?null:value;persist();render();break;
+ case 'reset':{if(confirm('Start over? This clears the current choices, decision history and local reflection.')){S={...EMPTY};persist();go('welcome')}}break;
+}}
+document.addEventListener('click',function(e){let t=e.target.closest('[data-action]');if(t)act(t.dataset.action,t.dataset.value||null)});
+render();
+// The narrative and accessible map remain playable even if the CDN fails.
+setTimeout(function(){if(S.page==='explore'&&S.view==='3d'&&!customElements.get('model-viewer')){viewerWarning=true;render()}},9000);
+</script>
+</body>
+</html>
