@@ -6,7 +6,14 @@
 <meta name="theme-color" content="#233237" />
 <meta name="description" content="Yudae: The Commons. An experimental mobile-first spatial Plæthru with 3D and phone AR viewing." />
 <title>Yudae / The Commons — Spatial Plæthru</title>
-<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+<script type="module">
+// Pin the viewer and try a second distributor only if its module cannot load.
+try { await import('https://unpkg.com/@google/model-viewer@4.4.0/dist/model-viewer.min.js'); }
+catch (firstError) {
+ try { await import('https://cdn.jsdelivr.net/npm/@google/model-viewer@4.4.0/dist/model-viewer.min.js'); }
+ catch (error) { window.yudaeViewerLoadError=true; }
+}
+</script>
 <style>
 :root{color-scheme:dark;--bg:#1b292d;--panel:#28393e;--panel2:#31464a;--ink:#ecebe3;--muted:#b7c5c4;--faint:#899f9f;--rule:#4a6063;--accent:#a2d7c6;--gold:#f1d08e;--coral:#e3a89d;--button:#d8e7d5;--buttonink:#21343a;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
 *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#3d5b59 0,#1b292d 57%);color:var(--ink);font-size:16px;line-height:1.52}
@@ -35,7 +42,7 @@ h1{font-size:clamp(33px,7.6vw,56px);line-height:1.04;letter-spacing:-.045em;marg
 
 /* AR reliability patch v0.2: genuine AR requires public HTTPS, camera overlay is unanchored. */
 .model-panel{isolation:isolate}
-.model-panel .loadingScene{position:absolute;inset:0;z-index:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:linear-gradient(145deg,#607b73,#253c3f);color:#e7eee8;font-size:14px}.model-panel.model-ready .loadingScene,.model-panel.is-camera .loadingScene{display:none}
+.model-panel .loadingScene{position:absolute;inset:0;z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:linear-gradient(145deg,#607b73,#253c3f);color:#e7eee8;font-size:14px}.model-panel.model-ready .loadingScene,.model-panel.is-camera .loadingScene{display:none}
 .model-panel video.camera-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:0;background:#0c1719}
 .model-panel.is-camera video.camera-layer{display:block}
 .model-panel model-viewer{position:relative;z-index:1}
@@ -197,16 +204,65 @@ function mapBlock(){const p=S.priority||'none'; return `<div class="mapcard" dat
 <g fill="#f1bda8"><circle cx="210" cy="324" r="12"/></g><g fill="#eecb79"><circle cx="494" cy="219" r="12"/></g><g fill="#80cbbb"><circle cx="203" cy="429" r="12"/></g>
 </svg><div class="mapsub">${p==='none'?'Shared battery still unallocated':`Current first allocation: ${labels[p]}`} · highlighted route shows power, not wellbeing</div></div><div class="map-keys">${['clinic','shuttle','commons'].map(x=>`<button type="button" class="key ${S.focus===x?'active':''}" data-action="place" data-value="${x}">${x==='clinic'?'✦ Clinic':x==='shuttle'?'✦ Shuttle':'✦ Commons'}</button>`).join('')}</div>${S.focus&&labels[S.focus]?`<div class="callout"><strong>${labels[S.focus]}</strong><p>${{clinic:'Supplies rely on uncertain cold storage. Rae is monitoring the limits of what is known.',shuttle:'The route depends on the driver, road access, and a radio that cannot stay charged.',commons:'A text desk can coordinate information, but it cannot supply the power the other sites need.'}[S.focus]}</p></div>`:''}`}
 function spatial(){
- let useMap=S.view==='map'||viewerWarning;
+ let useMap=S.view==='map';
  const arReady=AR_HOSTED;
  const arNote=arReady
  ? 'This is the hosted version. On a compatible phone, use Place in my space for real surface-anchored AR. If it opens and returns, check Chrome, Google Play Services for AR and camera permissions.'
  : (IS_EMBEDDED_PREVIEW
     ? 'Native surface-anchored AR is unavailable in this self-contained preview: its temporary 3D files cannot be opened by the separate Android AR viewer. The camera-overlay experiment below is available where camera permissions are supported.'
     : 'Native surface-anchored AR requires this entire folder to be hosted on an HTTPS website; opening index.html as a download cannot launch it reliably.');
- return `<div class="view-toggle"><button type="button" data-action="view" data-value="3d" class="${!useMap?'selected':''}" aria-pressed="${!useMap}">3D / camera</button><button type="button" data-action="view" data-value="map" class="${useMap?'selected':''}" aria-pressed="${useMap}">Accessible map</button></div><div class="detail-control" role="group" aria-label="3D model detail"><span>Model detail</span><button type="button" data-action="detail" data-value="high" aria-pressed="${S.detail!==false}">Story-rich</button><button type="button" data-action="detail" data-value="low" aria-pressed="${S.detail===false}">Simpler</button></div>${useMap?mapBlock():`<div class="model-panel" id="modelPanel"><div class="loadingScene" aria-hidden="true">Preparing the Yudae miniature…</div><video id="cameraLayer" class="camera-layer" playsinline muted autoplay aria-hidden="true"></video><model-viewer id="viewer" src="${modelPath()}" ${arReady?'ar ar-modes="webxr scene-viewer quick-look"':''} camera-controls touch-action="pan-y" shadow-intensity=".8" shadow-softness=".9" exposure="1.1" environment-image="neutral" camera-orbit="35deg 63deg 4.6m" min-camera-orbit="auto auto 1.05m" max-camera-orbit="auto auto 9m" interaction-prompt="auto" alt="Miniature Yudae Commons, clinic and shuttle dispatch. Six numbered inspectable locations reveal incomplete evidence; power routing changes after recommendations.">${evidenceOrder.map((k,i)=>`<button type="button" slot="hotspot-${k}" data-position="${evidence[k].loc}" data-normal="0 1 0" class="hotspot" data-action="inspect" data-value="${k}" aria-label="Inspect ${evidence[k].title}" aria-pressed="${S.objectFocus===k}">${i+1}</button>`).join('')}${arReady?'<button type="button" slot="ar-button" class="ar-button">Place in my space ↗</button>':''}</model-viewer></div><p class="quiet">Drag to rotate and pinch to zoom. Choose Story-rich to see environmental evidence or Simpler if your device struggles. To place Yudae in your room, use native AR on a compatible phone.</p><div class="ar-hint">${arNote}</div><p class="quiet" id="modelNotice" aria-live="polite"></p><button class="smallbutton" data-action="view" data-value="map" type="button">3D not working? Use the accessible map</button>`}`;
+ return `<div class="view-toggle"><button type="button" data-action="view" data-value="3d" class="${!useMap?'selected':''}" aria-pressed="${!useMap}">3D / camera</button><button type="button" data-action="view" data-value="map" class="${useMap?'selected':''}" aria-pressed="${useMap}">Accessible map</button></div><div class="detail-control" role="group" aria-label="3D model detail"><span>Model detail</span><button type="button" data-action="detail" data-value="high" aria-pressed="${S.detail!==false}">Story-rich</button><button type="button" data-action="detail" data-value="low" aria-pressed="${S.detail===false}">Simpler</button></div>${useMap?mapBlock():`<div class="model-panel" id="modelPanel"><div class="loadingScene" role="status">Preparing the Yudae miniature…</div><video id="cameraLayer" class="camera-layer" playsinline muted autoplay aria-hidden="true"></video><model-viewer id="viewer" src="${modelPath()}" ${arReady?'ar ar-modes="webxr scene-viewer quick-look"':''} camera-controls touch-action="pan-y" shadow-intensity=".8" shadow-softness=".9" exposure="1.1" environment-image="neutral" loading="eager" reveal="auto" camera-orbit="35deg 63deg 105%" min-camera-orbit="auto auto 1.05m" max-camera-orbit="auto auto 9m" interaction-prompt="auto" alt="Miniature Yudae Commons, clinic and shuttle dispatch. Six numbered inspectable locations reveal incomplete evidence; power routing changes after recommendations.">${evidenceOrder.map((k,i)=>`<button type="button" slot="hotspot-${k}" data-position="${evidence[k].loc}" data-normal="0 1 0" class="hotspot" data-action="inspect" data-value="${k}" aria-label="Inspect ${evidence[k].title}" aria-pressed="${S.objectFocus===k}">${i+1}</button>`).join('')}${arReady?'<button type="button" slot="ar-button" class="ar-button">Place in my space ↗</button>':''}</model-viewer></div><p class="quiet">Drag to rotate and pinch to zoom. Choose Story-rich to see environmental evidence or Simpler if your device struggles. To place Yudae in your room, use native AR on a compatible phone.</p><div class="ar-hint">${arNote}</div><p class="quiet" id="modelNotice" role="status">Loading the 3D viewer and town…</p><div class="camera-actions"><button type="button" data-action="retry-viewer">Retry 3D loading</button></div>${directARLink()}<button class="smallbutton" data-action="view" data-value="map" type="button">3D not working? Use the accessible map</button>`}`;
 }
 
+
+
+function directARLink(){
+ if(!AR_HOSTED || !/Android/i.test(navigator.userAgent))return '';
+ const modelURL=new URL(modelPath(),location.href).href;
+ const fallback=new URL('diagnostics.html',location.href).href;
+ const intent='intent://arvr.google.com/scene-viewer/1.0?file='+encodeURIComponent(modelURL)+'&mode=ar_preferred&title=Yudae#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;S.browser_fallback_url='+encodeURIComponent(fallback)+';end;';
+ return '<a class="button secondary" href="'+intent+'">Open town directly in Android AR</a><p class="quiet">Uses the selected scene and detail level. Requires a supported Android device and AR services; opens outside this webpage.</p>';
+}
+function wireViewer(v){
+ if(!v)return;
+ const panel=v.closest('.model-panel');
+ const notice=document.getElementById('modelNotice');
+ const loading=panel.querySelector('.loadingScene');
+ let finished=false, fallback=false;
+ const say=text=>{if(v.isConnected){notice.textContent=text;loading.textContent=text;}};
+ const timer=setTimeout(()=>{
+  if(!v.isConnected||finished)return;
+  say(!customElements.get('model-viewer')
+   ? 'The viewer software is still unavailable. Check your connection, then Retry 3D loading. You can also use the accessible map.'
+   : 'The town has not finished loading. You can keep waiting, choose Simpler, or retry. The accessible map remains available.');
+ },20000);
+ v.addEventListener('progress',e=>{
+  if(!finished && e.detail && e.detail.totalProgress>0) say('Loading town: '+Math.round(e.detail.totalProgress*100)+'%');
+ });
+ v.addEventListener('load',()=>{
+  finished=true;clearTimeout(timer);panel.classList.add('model-ready');
+  notice.textContent=(fallback?'Simpler town loaded after the detailed model failed.':'Town loaded.')+' Drag to rotate; select a numbered object to inspect it.';
+ });
+ v.addEventListener('error',e=>{
+  if(!v.isConnected)return;
+  const type=e.detail&&e.detail.type;
+  if(!fallback && S.detail!==false && type==='loadfailure'){
+   fallback=true;S.detail=false;persist();
+   document.querySelectorAll('[data-action="detail"]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.value==='low')));
+   say('Detailed town could not load. Trying the simpler scene…');v.src=modelPath();return;
+  }
+  finished=true;clearTimeout(timer);
+  say('The 3D viewer could not render this scene'+(type?' ('+type+')':'')+'. Try Simpler or Retry 3D loading. The accessible map is available below.');
+ });
+ v.addEventListener('ar-status',e=>{if(e.detail&&e.detail.status==='failed')notice.textContent='AR did not start. On Android, try the direct AR link below. Phone AR still requires a compatible device and AR services.';});
+ v.querySelectorAll('button.hotspot').forEach(btn=>btn.addEventListener('click',e=>{e.stopPropagation();act('inspect',btn.dataset.value)}));
+ // A failed graphics context can leave the custom element blank without a load error.
+ try{
+  const canvas=document.createElement('canvas');const gl=canvas.getContext('webgl2');
+  if(!gl){finished=true;clearTimeout(timer);say('This browser cannot start the graphics engine required for 3D (WebGL 2). Try your phone’s normal browser, use direct Android AR where available, or continue with the accessible map.');}
+  else {const ext=gl.getExtension('WEBGL_lose_context');if(ext)ext.loseContext();}
+ }catch(e){say('Graphics availability could not be checked. Waiting for the viewer…');}
+}
 
 let cameraStream=null;
 function stopCamera(){
@@ -244,7 +300,7 @@ async function startCamera(){
 
 function render(){stopCamera();const root=document.getElementById('screen');let h='';
  switch(S.page){
- case 'welcome': h=`<div class="eyebrow">A Yudae spatial experiment / v0.4</div><h1>The battery at the Commons.</h1><p class="lead">In 2030, the lights are on in some parts of Yudae. In others, people are making promises that electricity cannot keep.</p><div class="card"><span class="tag">8–12 minutes · phone-first</span><div class="stretch"></div><p>Explore a detailed town miniature, inspect six physical objects for incomplete evidence, hear three partial perspectives, recommend what receives power and observe what physically changes. Explore the changing miniature in 3D, or try the optional camera overlay. True surface-anchored AR requires a hosted HTTPS version on a compatible phone.</p><p class="quiet">A separate pilot vignette. Yudae’s nine main scenarios remain unchanged.</p></div><div class="actions">${action('Enter Yudae','begin')}${action('Preview the spatial scene','preview','secondary')}</div><div class="divider"></div><p class="quiet">Fictional conditions, not an emergency protocol. No right-answer points or diagnostic wellbeing ratings. Your path and notes stay in this browser, where storage is available.</p>`;break;
+ case 'welcome': h=`<div class="eyebrow">A Yudae spatial experiment / v0.4.1</div><h1>The battery at the Commons.</h1><p class="lead">In 2030, the lights are on in some parts of Yudae. In others, people are making promises that electricity cannot keep.</p><div class="card"><span class="tag">8–12 minutes · phone-first</span><div class="stretch"></div><p>Explore a detailed town miniature, inspect six physical objects for incomplete evidence, hear three partial perspectives, recommend what receives power and observe what physically changes. Explore the changing miniature in 3D or launch phone AR. True surface-anchored AR requires a hosted HTTPS version on a compatible phone.</p><p class="quiet">A separate pilot vignette. Yudae’s nine main scenarios remain unchanged.</p></div><div class="actions">${action('Enter Yudae','begin')}${action('Preview the spatial scene','preview','secondary')}</div><div class="divider"></div><p class="quiet">Fictional conditions, not an emergency protocol. No right-answer points or diagnostic wellbeing ratings. Your path and notes stay in this browser, where storage is available.</p>`;break;
  case 'perspective': h=`${header('perspective',1)}<div class="eyebrow">Perspective</div><h2>Whose side of the doorway?</h2><p>Start from one position. You can still inquire about the others. Changing the perspective changes what you hear first, not what secretly happened.</p><div class="people">${['rae','imani','sol'].map(k=>personCard(k)).join('')}</div>${S.role?`<div class="callout"><strong>${character[S.role].name} / ${character[S.role].role}</strong><p>${character[S.role].intro}</p></div>`:''}<div class="actions"><button type="button" class="button" data-action="to-encounter" ${S.role?'':'disabled'}>Continue to the encounter →</button></div>`;break;
  case 'encounter': h=`${header('encounter',2)}<div class="eyebrow">Encounter · 18:10, the Commons</div><h2>The one working battery.</h2><p>The rain reaches the doorway just as the site steward unplugs the last working portable battery. Its charge will support one of three connections for the next twenty-five minutes. Switching takes time.</p><p>The clinic’s cold-storage monitor is failing. The school shuttle’s dispatch radio is nearly dead. A public text desk is needed to correct rumours about shelters and roads.</p><p>The state departments still exist, but tonight their phone numbers produce recorded messages. The site team has asked for a recommendation. <strong>They retain authority to accept or refuse it.</strong></p><div class="callout"><strong>Your initial vantage: ${character[S.role].name}</strong><p>${character[S.role].intro}</p></div><p class="mini-head">Ask another person (optional)</p><div class="people">${['rae','imani','sol'].map(k=>personCard(k,'ask')).join('')}</div>${S.focus&&character[S.focus]?`<div class="card"><span class="tag">Account · not verified</span><h3>${character[S.focus].name} says</h3><p class="quote">“${character[S.focus].testimony}”</p><p class="quiet">Limit: ${character[S.focus].position}</p></div>`:''}<p class="quiet">You may decide with incomplete information. Asking does not guarantee certainty.</p><div class="actions">${action('Look around the Commons','to-explore')}${action('Choose without more information','to-decision1','secondary')}</div>`;break;
  case 'explore': h=`${header('explore',3)}<div class="eyebrow">Situated evidence</div><h2>What can you actually establish?</h2><p>Move around the model, or use the accessible map. Select any numbered object to investigate its clues, limitations and possible follow-up. You can leave without examining everything.</p>${spatial()}<div class="state-line"><span class="pill">Clinic · supply stability</span><span class="pill">Shuttle · transport</span><span class="pill">Commons · shared information</span></div><div id="inspectionMount">${inspectPanel()}</div><p class="quiet">Inspect details in the webpage or accessible map. In native Android AR, the miniature is visible but the web-based inspection controls may not transfer into the external AR viewer.</p><div class="actions">${action(S.returnTo==='after1'?'Back to first consequence':S.returnTo==='ending'?'Return to consequences':S.returnTo==='reflect'?'Return to reflection':S.returnTo==='welcome'?'Return to start':'Recommend an allocation','leave-explore')}</div>`;break;
@@ -256,9 +312,8 @@ function render(){stopCamera();const root=document.getElementById('screen');let 
  }
  root.innerHTML=h;
  if(S.page==='reflect'){const note=root.querySelector('#journal');note.value=S.note||'';note.addEventListener('input',e=>{S.note=e.target.value;persist()})}
- if(S.page==='explore'&&S.view==='3d'&&!viewerWarning){
-  const v=root.querySelector('model-viewer');if(v){v.addEventListener('load',()=>{document.getElementById('modelPanel')?.classList.add('model-ready')});v.addEventListener('error',()=>{const n=document.getElementById('modelNotice');if(n)n.textContent='The 3D model did not load. Try Simpler detail or the accessible map. The story remains playable.';document.getElementById('modelPanel')?.classList.add('model-ready')});v.addEventListener('ar-status',(e)=>{const n=document.getElementById('modelNotice');if(n&&e.detail?.status==='failed')n.textContent='AR could not start. Open the hosted page directly in Chrome/Safari, confirm camera permission and AR service support, or try the camera overlay.';});v.querySelectorAll('button.hotspot').forEach(btn=>{btn.addEventListener('click',e=>{e.stopPropagation();act('inspect',btn.dataset.value)})});}setTimeout(()=>{if(S.page==='explore'&&S.view==='3d'&&!customElements.get('model-viewer')){viewerWarning=true;render();}},8000);
- }
+ if(S.page==='explore'&&S.view==='3d') wireViewer(root.querySelector('model-viewer'));
+
 }
 function log(step,value){for(const e of S.history){if(step!=='observed'&&e.step===step&&!e.superseded)e.superseded=true}S.history.push({step,value,superseded:false})}
 function back(){const p=S.page;go({perspective:'welcome',encounter:'perspective',explore:S.returnTo||'encounter',decision1:'encounter',after1:'decision1',decision2:'after1',ending:'decision2',reflect:'ending'}[p]||'welcome')}
@@ -267,13 +322,14 @@ function act(action,value){switch(action){
  case 'home':go('welcome');break;
  case 'back':back();break;
  case 'begin':go('perspective');break;
- case 'preview':S.returnTo='welcome';go('explore');break;
+ case 'preview':S.view='3d';S.returnTo='welcome';go('explore');break;
  case 'role':S.role=value;S.focus=null;persist();render();break;
  case 'to-encounter':if(!S.role)break;S.focus=null;go('encounter');break;
  case 'ask':S.focus=S.focus===value?null:value;if(!S.asked.includes(value))S.asked.push(value);persist();render();break;
  case 'to-explore':S.view='3d';S.focus=null;S.returnTo='decision1';go('explore');break;
  case 'to-decision1':S.focus=null;go('decision1');break;
  case 'leave-explore':go(S.returnTo||'decision1');break;
+ case 'retry-viewer':viewerWarning=false;render();break;
  case 'view':S.view=value;viewerWarning=false;persist();render();break;
  case 'detail':S.detail=value!=='low';viewerWarning=false;persist();render();break;
  case 'camera-start':void startCamera();break;
@@ -295,8 +351,6 @@ function act(action,value){switch(action){
 }}
 document.addEventListener('click',function(e){let t=e.target.closest('[data-action]');if(t)act(t.dataset.action,t.dataset.value||null)});
 render();
-// The narrative and accessible map remain playable even if the CDN fails.
-setTimeout(function(){if(S.page==='explore'&&S.view==='3d'&&!customElements.get('model-viewer')){viewerWarning=true;render()}},9000);
 </script>
 </body>
 </html>
